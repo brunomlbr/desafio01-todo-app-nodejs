@@ -62,7 +62,6 @@ app.get('/todos', checksExistsUserAccount, (request, response) => {
 app.post('/todos', checksExistsUserAccount, (request, response) => {
   
   const { title, deadline } = request.body;
-
   const { user } = request ;
   
   const todoTask =
@@ -75,7 +74,6 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   };
 
   user.todos.push(todoTask);
-
   //return response.status(201).send(todoTask);
   return response.status(201).json(todoTask);
 
@@ -86,7 +84,7 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const { id } = request.params;
   const { user } = request;
   const { title, deadline } = request.body;
-
+  // retorna uma referencia do todo no vetor que pode ser subistituida
   const todo = user.todos.find(todo => todo.id === id);
 
   if(!todo){
@@ -101,11 +99,36 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { id } = request.params;
+  const { user } = request;
+
+  const todo = user.todos.find(todo => todo.id === id);
+
+  if(!todo){
+    return response.status(404).json({error: "Todo not found!"});
+  }
+
+  todo.done = true;
+
+  return response.json(todo);
+
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { user } = request;
+  const { id } = request.params;
+
+  // retorna a posição do todo no vetor
+  const todoIndex = user.todos.findIndex(todo => todo.id === id);
+
+  if(todoIndex === -1){
+    return response.status(404).json({error: "Todo not found!"});
+  }
+
+  // splice("a partir da posição index", "exclua 1 elemento")
+  user.todos.splice(todoIndex, 1);
+
+  return response.status(204).json();
 });
 
 module.exports = app;
